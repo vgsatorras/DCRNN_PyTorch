@@ -15,7 +15,7 @@ def run_dcrnn(args):
         graph_pkl_filename = supervisor_config['data'].get('graph_pkl_filename')
         sensor_ids, sensor_id_to_ind, adj_mx = load_graph_data(graph_pkl_filename)
 
-        supervisor = DCRNNSupervisor(adj_mx=adj_mx, **supervisor_config)
+        supervisor = DCRNNSupervisor(args, adj_mx=adj_mx, **supervisor_config)
         mean_score, outputs = supervisor.evaluate('test')
         np.savez_compressed(args.output_filename, **outputs)
         print("MAE : {}".format(mean_score))
@@ -29,5 +29,6 @@ if __name__ == '__main__':
     parser.add_argument('--config_filename', default='data/model/pretrained/METR-LA/config.yaml', type=str,
                         help='Config file for pretrained model.')
     parser.add_argument('--output_filename', default='data/dcrnn_predictions.npz')
+    parser.add_argument('--batch_size', type=int, default=16)
     args = parser.parse_args()
     run_dcrnn(args)

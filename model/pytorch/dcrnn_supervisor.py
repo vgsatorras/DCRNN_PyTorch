@@ -13,11 +13,12 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class DCRNNSupervisor:
-    def __init__(self, adj_mx, **kwargs):
+    def __init__(self, args, adj_mx, **kwargs):
         self._kwargs = kwargs
         self._data_kwargs = kwargs.get('data')
         self._model_kwargs = kwargs.get('model')
         self._train_kwargs = kwargs.get('train')
+        self._kwargs['data']['batch_size'] = args.batch_size
 
         self.max_grad_norm = self._train_kwargs.get('max_grad_norm', 1.)
 
