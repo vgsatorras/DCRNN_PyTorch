@@ -171,6 +171,7 @@ class DCRNNSupervisor:
         batches_seen = num_batches * self._epoch_num
 
         for epoch_num in range(self._epoch_num, epochs):
+            avg_time, counter_time = 0, 0
 
             self.dcrnn_model = self.dcrnn_model.train()
 
@@ -179,12 +180,17 @@ class DCRNNSupervisor:
 
             start_time = time.time()
 
-            for _, (x, y) in enumerate(train_iterator):
+            for batch_idx, (x, y) in enumerate(train_iterator):
                 optimizer.zero_grad()
 
                 x, y = self._prepare_data(x, y)
-
+                if torch.cuda.is_available(): torch.cuda.synchronize()
+                t1 = time.time()
                 output = self.dcrnn_model(x, y, batches_seen)
+                if torch.cuda.is_available(): torch.cuda.synchronize()
+                t2 = time.time()
+                avg_time += (t2 - t1)
+                counter_time += 1
 
                 if batches_seen == 0:
                     # this is a workaround to accommodate dynamically registered parameters in DCGRUCell
@@ -203,6 +209,8 @@ class DCRNNSupervisor:
                 torch.nn.utils.clip_grad_norm_(self.dcrnn_model.parameters(), self.max_grad_norm)
 
                 optimizer.step()
+                if batch_idx % 50 == 0:
+                    self._logger.info("Average forward time: %.4f" % (1.0*avg_time/counter_time))
             self._logger.info("epoch complete")
             lr_scheduler.step()
             self._logger.info("evaluating now!")
