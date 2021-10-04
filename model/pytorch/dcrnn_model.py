@@ -157,9 +157,9 @@ class DCRNNModel(nn.Module, Seq2SeqAttrs):
         :return: output: (self.horizon, batch_size, self.num_nodes * self.output_dim)
         """
         encoder_hidden_state = self.encoder(inputs)
-        self._logger.debug("Encoder complete, starting decoder")
+        #self._logger.debug("Encoder complete, starting decoder")
         outputs = self.decoder(encoder_hidden_state, labels, batches_seen=batches_seen)
-        self._logger.debug("Decoder complete")
+        #self._logger.debug("Decoder complete")
         if batches_seen == 0:
             self._logger.info(
                 "Total trainable parameters {}".format(count_parameters(self))
